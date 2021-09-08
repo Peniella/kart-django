@@ -33,7 +33,7 @@ def payments(request):
         orderproduct.order_id=order.id
         orderproduct.payment=payment
         orderproduct.user_id=request.user.id
-        orderproduct.product_id=item.id
+        orderproduct.product_id=item.product_id
         orderproduct.quantity=item.quantity
         orderproduct.product_price=item.product.price
         orderproduct.ordered=True
@@ -44,15 +44,15 @@ def payments(request):
         orderproduct=OrderProduct.objects.get(id=orderproduct.id)
         orderproduct.variations.set(product_variation)
         orderproduct.save()
-
-        #reduce quantity
+    #
+    #     #reduce quantity
         product=Product.objects.get(id=item.product_id)
         product.stock -= item.quantity
         product.save()
-
-    #clear cart
+    #
+    # #clear cart
     CartItem.objects.filter(user=request.user).delete()
-    # send email
+    # # send email
     mail_subject = "Thank you for your Order"
     message = render_to_string("orders/order_received_email.html", {
         'user': request.user,
@@ -62,12 +62,12 @@ def payments(request):
     send_email = EmailMessage(mail_subject, message, to=[to_email])
     send_email.send()
 
-    #send order number
+    # #send order number
     data={
         'order_number':order.order_number,
         'transID':payment.payment_id,
     }
-
+    #
     return JsonResponse(data)
     # return render(request, 'orders/payments.html')
 
@@ -139,7 +139,7 @@ def order_complete(request):
         payment=Payment.objects.get(payment_id=transID)
         subtotal=0
         for i in ordered_products:
-            subtotal+=i.product_price*i.product_quantity
+            subtotal += i.product_price * i.quantity
 
         context={
             'order': order,
